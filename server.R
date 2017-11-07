@@ -6,18 +6,17 @@
 #
 
 library(shiny)
-library(RMariaDB)
+library(RMySQL)
 library(DBI)
 
 # Define database options
 options(mysql = list(
   "host" = "localhost",
   "port" = 3306,
-  "user" = "root",
-  "password" = "symptomhub1234"
+  "user" = "root"
 ))
 databaseName <- "readme_info"
-table <- "readme"
+table <- "readme_basic"
 
 # Define fields that we want to save from form
 fieldsAll <- c("title","num_part","corr_type","description","sample_type","authors","date_range", "citation","email")
@@ -29,8 +28,8 @@ epochTime <- function() {
 }
 
 shinyServer(function(input, output) {
-
-# For Downloading Data tab  
+  
+  # For Downloading Data tab  
   
   # Reactive value for selected dataset ----
   datasetInput <- reactive({
@@ -64,7 +63,7 @@ shinyServer(function(input, output) {
   # Whenever a field is filled, aggregate all form data
   formData <- reactive({
     data <- sapply(fieldsAll, function(x) input[[x]])
-    data <- c(data, timestamp = epochTime())
+    # data <- c(data, timestamp = epochTime())
     data <- t(data)
     data
   })
@@ -74,7 +73,7 @@ shinyServer(function(input, output) {
   #  fileName <- sprintf("%s_%s.csv",
   #                      humanTime(),
   #                      digest::digest(data))
-    
+  
   #  write.csv(x = data, file = file.path(responsesDir, fileName),
   #            row.names = FALSE, quote = TRUE)
   #}
@@ -98,14 +97,15 @@ shinyServer(function(input, output) {
   # saveData for remote SQL database
   saveData <- function(data) {
     # Connect to the database
-    db <- dbConnect(RMariaDB::MariaDB(), dbname = databaseName, host = options()$mysql$host, 
+    db <- dbConnect(RMySQL::MySQL(), dbname = databaseName, host = options()$mysql$host, 
                     port = options()$mysql$port, user = options()$mysql$user, 
                     password = options()$mysql$password)
     # Construct the update query by looping over the data fields
     query <- sprintf(
       "INSERT INTO %s (%s) VALUES ('%s')",
       table, 
-      paste(names(data), collapse = ", "),
+      #paste(names(data), collapse = ", "),
+      paste(fieldsAll, collapse=", "),
       paste(data, collapse = "', '")
     )
     # Submit the update query and disconnect
@@ -116,13 +116,13 @@ shinyServer(function(input, output) {
   #loadData for remote SQL database
   loadData <- function() {
     # Connect to the database
-    db <- dbConnect(RMariaDB::MariaDB(), dbname = databaseName, host = options()$mysql$host, 
+    db <- dbConnect(RMySQL::MySQL(), dbname = databaseName, host = options()$mysql$host, 
                     port = options()$mysql$port, user = options()$mysql$user, 
                     password = options()$mysql$password)
     # Construct the fetching query
     query <- sprintf("SELECT * FROM %s", table)
     # Submit the fetch query and disconnect
-    data <- dbSendQuery(db, query)
+    data <- dbGetQuery(db, query)
     dbDisconnect(db)
     data
   }
@@ -159,7 +159,7 @@ shinyServer(function(input, output) {
     #  return(head(df))
     #}
     #else {
-      return(df)
+    return(df)
     #}
     
   })
