@@ -8,6 +8,7 @@
 library(shiny)
 library(RMySQL)
 library(DBI)
+library(DT)
 
 # Define database options
 options(mysql = list(
@@ -40,8 +41,8 @@ shinyServer(function(input, output) {
   })
   
   # Generate a summary of the data ----
-  output$summary <- renderPrint({
-    summary(datasetInput())
+  output$summary <- DT::renderDataTable({
+    loadData()
   })
   
   # Table of selected dataset ----
@@ -137,7 +138,7 @@ shinyServer(function(input, output) {
   
   # Show the previous responses
   # (update with current response when Submit is clicked)
-  output$responses <- renderTable({
+  output$responses <- DT::renderDataTable({
     input$submit
     loadData()
   })

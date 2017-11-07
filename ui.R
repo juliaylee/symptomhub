@@ -6,6 +6,7 @@
 #
 
 library(shiny)
+library(DT)
 
 # Define UI for data download app ----
 ui <- navbarPage("Welcome!",
@@ -33,7 +34,7 @@ ui <- navbarPage("Welcome!",
       
       # Output: Tabset w/ plot, summary, and table ----
       tabsetPanel(type = "tabs",
-                  tabPanel("Summary", verbatimTextOutput("summary")),
+                  tabPanel("Summary", DT::dataTableOutput("summary")),
                   tabPanel("Table", tableOutput("table"))
       
       )
@@ -137,10 +138,9 @@ ui <- navbarPage("Welcome!",
     
     # Output: Tabset w/ README and contents ----
     tabsetPanel(type = "tabs",
-                tabPanel("README", tableOutput("responses"),
+                tabPanel("README", DT::dataTableOutput("responses")),
                 tabPanel("Contents", tableOutput("contents"))
                 
-    )           
     )
              
   )          
