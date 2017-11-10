@@ -47,7 +47,11 @@ shinyServer(function(input, output) {
   # Generate a summary of the data ----
   output$summary <- DT::renderDataTable({
     loadData()
-  })
+  }
+  #,selection="single"
+  )
+
+  output$selected <- renderPrint(input$summary_rows_selected)
   
   # Table of selected dataset ----
   output$table <- renderTable({
@@ -72,16 +76,7 @@ shinyServer(function(input, output) {
     data <- t(data)
     data
   })
-  
-  # Save each instance of "responses" as a csv
-  #saveData <- function(data) {
-  #  fileName <- sprintf("%s_%s.csv",
-  #                      humanTime(),
-  #                      digest::digest(data))
-  
-  #  write.csv(x = data, file = file.path(responsesDir, fileName),
-  #            row.names = FALSE, quote = TRUE)
-  #}
+
   saveCSVData <- function(datapath) {
     data <- read.csv(datapath,
                    header = TRUE,

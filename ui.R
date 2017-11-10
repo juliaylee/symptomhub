@@ -25,7 +25,10 @@ ui <- navbarPage("Welcome!",
                   choices = c("rock", "pressure", "cars")),
       
       # Button
-      downloadButton("downloadData", "Download")
+      downloadButton("downloadData", "Download"),
+
+      # Test selected row
+      verbatimTextOutput("selected")
       
     ),
     
