@@ -22,7 +22,11 @@ table <- "readme_basic"
 # Define fields that we want to save from form
 fieldsAll <- c("title","num_part","corr_type","description","sample_type","authors","date_range", "citation","email")
 
-responsesDir <- file.path("responses")
+# for local testing
+# responsesDir <- file.path("~/Desktop")
+# on server
+ responsesDir <- file.path("/tmp")
+
 # save timestamp for each response as well
 epochTime <- function() {
   as.integer(Sys.time())
@@ -78,6 +82,18 @@ shinyServer(function(input, output) {
   #  write.csv(x = data, file = file.path(responsesDir, fileName),
   #            row.names = FALSE, quote = TRUE)
   #}
+  saveCSVData <- function(datapath) {
+    data <- read.csv(datapath,
+                   header = TRUE,
+                   sep = ",",
+                   quote = '"')
+    fileName <- sprintf("%s_%s.csv",
+                        humanTime(),
+                        digest::digest(data))
+
+    write.csv(x = data, file = file.path(responsesDir, fileName),
+              row.names = FALSE, quote = TRUE)
+  }
   
   # Temporary saveData on local session
   #saveData <- function(data) {
@@ -133,6 +149,7 @@ shinyServer(function(input, output) {
   
   # When the Submit button is clicked, save the form data
   observeEvent(input$submit, {
+    saveCSVData(input$file1$datapath)
     saveData(formData())
   })
   
