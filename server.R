@@ -46,7 +46,7 @@ shinyServer(function(input, output) {
   
   # Generate a summary of the data ----
   output$summary <- DT::renderDataTable({
-    loadData()
+    loadDataFilter()
   }
   ,callback = JS(
     "table.on('click.dt', 'tr', function() {
@@ -154,12 +154,22 @@ shinyServer(function(input, output) {
     dbSendQuery(db, query)
     dbDisconnect(db)
   }
+
+  # Construct query for filtered data
+  fetchQuery <- reactive({
+     if (input$filter_corr_type != "-") {
+       retQuery <- sprintf("SELECT * FROM %s WHERE corr_type = %s", table, input$filter_corr_type)
+     }
+      else {
+       retQuery <- sprintf("SELECT * FROM %s", table)
+      }
+    })
   
   #loadData for remote SQL database
   loadData <- function() {
     # Connect to the database
-    db <- dbConnect(RMySQL::MySQL(), dbname = databaseName, host = options()$mysql$host, 
-                    port = options()$mysql$port, user = options()$mysql$user, 
+    db <- dbConnect(RMySQL::MySQL(), dbname = databaseName, host = options()$mysql$host,
+                    port = options()$mysql$port, user = options()$mysql$user,
                     password = options()$mysql$password)
     # Construct the fetching query
     query <- sprintf("SELECT * FROM %s", table)
@@ -169,6 +179,18 @@ shinyServer(function(input, output) {
     data
   }
   
+  loadDataFilter <- function() {
+    # Connect to the database
+    db <- dbConnect(RMySQL::MySQL(), dbname = databaseName, host = options()$mysql$host,
+                    port = options()$mysql$port, user = options()$mysql$user,
+                    password = options()$mysql$password)
+    # Submit the fetch query and disconnect
+    print(fetchQuery())
+    data <- dbGetQuery(db, fetchQuery())
+    dbDisconnect(db)
+    data
+  }
+
   # Use humanTime instead of epochTime for more readable timestamp
   humanTime <- function() format(Sys.time(), "%Y%m%d-%H%M%OS")
   

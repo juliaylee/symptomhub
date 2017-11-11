@@ -23,9 +23,13 @@ ui <- navbarPage("Welcome!",
       # Input: Choose dataset ----
       selectInput("dataset", "Choose a dataset:",
                   choices = c("rock", "pressure", "cars")),
-      
+
       # Button
       downloadButton("downloadData", "Download"),
+
+      # Filter by correlation type
+      selectInput("filter_corr_type", "Filter by correlation type:",
+                  choices = c("-", "1", "2", "3"), selected="-"),
 
       # Test selected row
       verbatimTextOutput("selected"),
