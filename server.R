@@ -48,11 +48,22 @@ shinyServer(function(input, output) {
   output$summary <- DT::renderDataTable({
     loadData()
   }
-  #,selection="single"
+  ,callback = JS(
+    "table.on('click.dt', 'tr', function() {
+    $(this).toggleClass('rowselected');
+    Shiny.onInputChange('rows',
+    table.rows('.rowselected').data().toArray());
+});")
   )
 
   output$selected <- renderPrint(input$summary_rows_selected)
-  
+  output$info <- renderPrint({
+    cat('Rows Selected File Ids: ')
+    # TODO: don't hardcode column numbers
+    if (length(input$rows) > 3)
+      cat(input$rows[seq(3,length(input$rows),12)])
+    
+  })  
   # Table of selected dataset ----
   output$table <- renderTable({
     datasetInput()
@@ -66,6 +77,25 @@ shinyServer(function(input, output) {
     content = function(file) {
       write.csv(datasetInput(), file, row.names = FALSE)
     })
+  
+  # Downloadable csvs of selected rows ----
+  output$downloadDataZip <- downloadHandler(
+    filename = 'data.zip',
+    content = function(fname) {
+      #tmpdir <- tempdir()
+      #setwd(tempdir())
+      #print(tempdir())
+      setwd("~/Desktop")
+      fs <- input$rows[seq(3,length(input$rows),12)]
+      print(fs)
+      for (f in fs) {
+        write.csv(datasetInput()$rock, file = paste(f,".csv",sep=""), sep =",")
+      }
+      zip(zipfile=fname, files=fs)
+    },
+    contentType = "application/zip"
+  )
+
   
   # For Uploading Dataset tab
   

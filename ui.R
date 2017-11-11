@@ -28,7 +28,8 @@ ui <- navbarPage("Welcome!",
       downloadButton("downloadData", "Download"),
 
       # Test selected row
-      verbatimTextOutput("selected")
+      verbatimTextOutput("selected"),
+      verbatimTextOutput("info")
       
     ),
     
