@@ -11,3 +11,24 @@ date_range VARCHAR(100),
 citation VARCHAR(500),
 email VARCHAR(100)
 );
+
+CREATE TABLE IF NOT EXISTS scales (
+scale_id INT(6) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+scale_abbr VARCHAR(25),
+scale_name VARCHAR(100)
+);
+
+CREATE TABLE IF NOT EXISTS scale_sequence (
+file_id INT(6),
+scale_id INT(6)
+);
+
+CREATE TABLE IF NOT EXISTS disorders (
+disorder_id INT(6) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+disorder_name VARCHAR(100)
+);
+
+CREATE TABLE IF NOT EXISTS disorder_sequence (
+file_id INT(6),
+disorder_id INT(6)
+);
