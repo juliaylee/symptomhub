@@ -9,6 +9,7 @@ library(shiny)
 library(RMySQL)
 library(DBI)
 library(DT)
+library(pool)
 
 # Define database options
 options(mysql = list(
@@ -20,19 +21,28 @@ databaseName <- "readme_info"
 table <- "readme_basic"
 
 # Define fields that we want to save from form
-fieldsAll <- c("title","num_part","corr_type","description","sample_type","authors","date_range", "citation","email")
+fieldsAll <- c("title","num_part", "scales", "scales_cols", "disorders", "corr_type","description","sample_type","authors","date_range", "citation","email")
 
 # for local testing
-# responsesDir <- file.path("~/Desktop")
+ responsesDir <- file.path("~/Desktop")
 # on server
- responsesDir <- file.path("/tmp")
+# responsesDir <- file.path("/tmp")
 
 # save timestamp for each response as well
 epochTime <- function() {
   as.integer(Sys.time())
 }
 
-shinyServer(function(input, output) {
+# Open a pool
+pool <- dbPool(
+  drv = RMySQL::MySQL(),
+  dbname = databaseName,
+  host = options()$mysql$host,
+                    port = options()$mysql$port, user = options()$mysql$user
+                    # , password = options()$mysql$password
+    )
+
+shinyServer(function(input, output, session) {
   
   # For Downloading Data tab  
   
@@ -99,6 +109,21 @@ shinyServer(function(input, output) {
   
   # For Uploading Dataset tab
   
+  # Load scales to display from scales table
+  sql <- "SELECT scale_abbr FROM scales"
+  query <- sqlInterpolate(pool, sql)
+  scales <- dbGetQuery(pool, query)  
+  
+  # Load disorders to display from disorders table
+  sql <- "SELECT disorder_name FROM disorders"
+  query <- sqlInterpolate(pool, sql)
+  disorders <- dbGetQuery(pool, query)
+  
+  # Server-side selectize for scales and disorders
+  updateSelectizeInput(session, 'scales', choices = scales, server = FALSE)
+  updateSelectizeInput(session, 'scales_cols', choices = scales, server = FALSE)
+  updateSelectizeInput(session, 'disorders', choices = disorders, server = FALSE)
+  
   # Whenever a field is filled, aggregate all form data
   formData <- reactive({
     data <- sapply(fieldsAll, function(x) input[[x]])
@@ -120,33 +145,17 @@ shinyServer(function(input, output) {
               row.names = FALSE, quote = TRUE)
   }
   
-  # Temporary saveData on local session
-  #saveData <- function(data) {
-  #  data <- as.data.frame(t(data),stringsAsFactors=FALSE)
-  #  if (exists("responses")) {
-  #    responses <<- rbind(responses, data)
-  #  } else {
-  #    responses <<- data
-  #  }
-  #}
-  
-  #loadData <- function() {
-  #  if (exists("responses")) {
-  #    responses
-  #  }
-  #}
-  
   # saveData for remote SQL database
   saveData <- function(data) {
     # Connect to the database
     db <- dbConnect(RMySQL::MySQL(), dbname = databaseName, host = options()$mysql$host, 
-                    port = options()$mysql$port, user = options()$mysql$user, 
-                    password = options()$mysql$password)
+                    port = options()$mysql$port, user = options()$mysql$user 
+                    #, password = options()$mysql$password
+                    )
     # Construct the update query by looping over the data fields
     query <- sprintf(
       "INSERT INTO %s (%s) VALUES ('%s')",
       table, 
-      #paste(names(data), collapse = ", "),
       paste(fieldsAll, collapse=", "),
       paste(data, collapse = "', '")
     )
@@ -169,8 +178,9 @@ shinyServer(function(input, output) {
   loadData <- function() {
     # Connect to the database
     db <- dbConnect(RMySQL::MySQL(), dbname = databaseName, host = options()$mysql$host,
-                    port = options()$mysql$port, user = options()$mysql$user,
-                    password = options()$mysql$password)
+                    port = options()$mysql$port, user = options()$mysql$user
+                    # , password = options()$mysql$password
+                    )
     # Construct the fetching query
     query <- sprintf("SELECT * FROM %s", table)
     # Submit the fetch query and disconnect

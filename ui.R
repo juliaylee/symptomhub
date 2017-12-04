@@ -103,7 +103,32 @@ ui <- navbarPage("Welcome!",
                   h5("Number of Participants"), 
                   value = 100),
     
-      # Input: Column Contents
+      # Input: Scales
+      selectizeInput("scales", 
+                     h5("Scales Included in Dataset"),
+                     choices = NULL,
+                     selected = NULL,
+                     multiple = TRUE,
+                     options = list(create = TRUE, placeholder = "Begin typing")
+                     ),
+      
+      # Input: Scale Columns
+      selectizeInput("scales_cols", 
+                     h5("Scale Columns"),
+                     choices = NULL,
+                     selected = NULL,
+                     multiple = TRUE,
+                     options = list(create = TRUE, placeholder = "e.g. QIDS-SR: 14-29")
+      ),
+      
+      # Input: Disorders
+      selectizeInput("disorders", 
+                     h5("Disorders Included in Dataset"),
+                     choices = NULL,
+                     selected = NULL,
+                     multiple = TRUE,
+                     options = list(create = TRUE, placeholder = "Begin typing")
+      ),
     
       # Input: Correlation Type
       selectInput("corr_type", h5("Type of correlation used"), 

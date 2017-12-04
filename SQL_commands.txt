@@ -3,6 +3,9 @@ ts TIMESTAMP,
 file_id INT(6) NOT NULL PRIMARY KEY AUTO_INCREMENT,
 title VARCHAR(100) NOT NULL,
 num_part INT(6),
+scales VARCHAR(1000),
+scales_cols VARCHAR(1000),
+disorders VARCHAR(1000),
 corr_type VARCHAR(100),
 description TEXT,
 sample_type VARCHAR(100),
@@ -15,12 +18,8 @@ email VARCHAR(100)
 CREATE TABLE IF NOT EXISTS scales (
 scale_id INT(6) NOT NULL PRIMARY KEY AUTO_INCREMENT,
 scale_abbr VARCHAR(25),
-scale_name VARCHAR(100)
-);
-
-CREATE TABLE IF NOT EXISTS scale_sequence (
-file_id INT(6),
-scale_id INT(6)
+scale_name VARCHAR(100),
+num_items INT(6)
 );
 
 CREATE TABLE IF NOT EXISTS disorders (
@@ -28,7 +27,10 @@ disorder_id INT(6) NOT NULL PRIMARY KEY AUTO_INCREMENT,
 disorder_name VARCHAR(100)
 );
 
-CREATE TABLE IF NOT EXISTS disorder_sequence (
-file_id INT(6),
-disorder_id INT(6)
-);
+INSERT INTO disorders (disorder_name) VALUES ('Depression (MDD, MDE)''),('Generalized Anxiety Disorder (GAD)'),('Obsessive-Compulsive Disorder (OCD)'),('Posttraumatic Stress Disorder (PTSD)'),('Complicated Grief (CG, PCBD)'),('Bulimia Nervosa (BN)'),('Alcohol Abuse'),('Alcohol Dependence'),('Attention Deficit/Hyperactivity Disorder (ADHD, ADD)'),('Bipolar Disorder I (BD-I)'),('Bipolar Disorder II (BD-II)'),('Autism Spectrum Disorders (ASD)'),('Panic Disorder'),('Schizophrenia'),('Anorexia Nervosa (AN)'),('Binge Eating Disorder'),('Insomnia'),('Tourette''s Disorder'),('Agoraphobia'),('Body Dysmorphic Disorder (BDD)'),('Pathological Gambling'),('Schizoaffective Disorder'),('Trichotillomania'),('Excoriation Disorder'),('Specific Phobia'),('Narcissistic Personality Disorder (NPD)'),('Obsessive-Compulsive Personality Disorder (OCPD)'),('Borderline Personality Disorder (BPD)'),('Non-suicidal Self Injury (NSSI)'),('Social Anxiety Disorder (SAD)'),('Nicotine Dependence'),('Conduct Disorder'),('Oppositional Defiant Disorder'),('Dysthymic Disorder');
+
+SET SQL_MODE = ANSI_QUOTES;
+
+INSERT INTO scales (scale_abbr, scale_name, num_items) VALUES ('DSM-IV MDD', 'Diagnostic and Statistical Manual of Mental Disorders IV Major Depressive Episode Criteria', 9),('DSM-5 MDD', 'Diagnostic and Statistical Manual of Mental Disorders 5 Major Depressive Disorder Symptoms', 9),('BDI', 'Beck Depression Inventory', 21),('BDI-II', 'Beck Depression Inventory II', 21),('QIDS-SR', 'Quick Inventory of Depressive Symptomatology Self-Report Version', 16),('IDS-SR', 'Inventory of Depressive Symptomatology Self-Report Version', 30),('DSM-IV GAD', 'Diagnostic and Statistical Manual of Mental Disorders IV Generalized Anxiety Disorder Symptoms', 8),('DSM-5 GAD', 'Diagnostic and Statistical Manual of Mental Disorders 5 Generalized Anxiety Disorder Symptoms', 8),('DSM-IV OCD','Diagnostic and Statistical Manual of Mental Disorders IV Obsessive Compulsive Disorder Criteria', 8),('DSM-5 OCD', 'Diagnostic and Statistical Manual of Mental Disorders 5 Obsessive Compulsive Disorder Criteria', 5),('Y-BOCS', 'Yale-Brown Obsessive Compulsive Scale', 10),('CY-BOCS', 'Children''s Yale-Brown Obsessive Compulsive Scale', 10),('DSM-IV PTSD', 'Diagnostic and Statistical Manual of Mental Disorders IV Posttraumatic Stress Disorder Criteria', 23),('DSM-5 PTSD', 'Diagnostic and Statistical Manual of Mental Disorders 5 Posttraumatic Stress Disorder Criteria', 23),('PCL-5', 'PTSD Checklist for DSM-5', 20),('ICG', 'Inventory of Complicated Grief', 5);
+
+
