@@ -24,7 +24,7 @@ table <- "readme_basic"
 fieldsAll <- c("title","num_part", "scales", "scales_cols", "disorders", "corr_type","description","sample_type","authors","date_range", "citation","email")
 
 # for local testing
- responsesDir <- file.path("~/Desktop")
+ responsesDir <- file.path("~/Desktop/CSVs")
 # on server
 # responsesDir <- file.path("/tmp")
 
@@ -46,14 +46,6 @@ shinyServer(function(input, output, session) {
   
   # For Downloading Data tab  
   
-  # Reactive value for selected dataset ----
-  datasetInput <- reactive({
-    switch(input$dataset,
-           "rock" = rock,
-           "pressure" = pressure,
-           "cars" = cars)
-  })
-  
   # Generate a summary of the data ----
   output$summary <- DT::renderDataTable({
     loadDataFilter()
@@ -66,14 +58,6 @@ shinyServer(function(input, output, session) {
 });")
   )
 
-  output$selected <- renderPrint(input$summary_rows_selected)
-  output$info <- renderPrint({
-    cat('Rows Selected File Ids: ')
-    # TODO: don't hardcode column numbers
-    if (length(input$rows) > 3)
-      cat(input$rows[seq(3,length(input$rows),12)])
-    
-  })  
   # Table of selected dataset ----
   output$table <- renderTable({
     datasetInput()
@@ -88,20 +72,17 @@ shinyServer(function(input, output, session) {
       write.csv(datasetInput(), file, row.names = FALSE)
     })
   
-  # Downloadable csvs of selected rows ----
+  # Download zip file of csvs of selected rows
+  # Assumes csv for each dataset is named with the corresponding file_id, e.g. "8.csv"
   output$downloadDataZip <- downloadHandler(
     filename = 'data.zip',
     content = function(fname) {
-      #tmpdir <- tempdir()
-      #setwd(tempdir())
-      #print(tempdir())
-      setwd("~/Desktop")
+      setwd("~/Desktop/CSVs")
+      # TODO: don't hardcode column numbers
       fs <- input$rows[seq(3,length(input$rows),12)]
       print(fs)
-      for (f in fs) {
-        write.csv(datasetInput()$rock, file = paste(f,".csv",sep=""), sep =",")
-      }
-      zip(zipfile=fname, files=fs)
+      fsv <- paste(fs,".csv",sep="")
+      zip(zipfile=fname, files=fsv)
     },
     contentType = "application/zip"
   )
@@ -206,6 +187,11 @@ shinyServer(function(input, output, session) {
   
   # When the Submit button is clicked, save the form data
   observeEvent(input$submit, {
+    # do not submit form if no  CSV is uploaded
+    # TODO: this is not quite working; error message not dipslaying
+    validate(
+     need(input$file1 != "", "Please select a CSV to upload")
+    )
     saveCSVData(input$file1$datapath)
     saveData(formData())
   })
